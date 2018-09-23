@@ -1,3 +1,9 @@
+/**
+ * load.c - loads board from file
+ * author: Alex Weininger
+ * modified: 9/23/2018
+ */
+
 #include "load.h"
 #include "cell.h"
 #include "minesweep.h"
@@ -17,9 +23,6 @@ game *file_load(char *filename) {
   int numCols = 0;
   fscanf(fp, "%d%d", &numRows, &numCols);
 
-  // TODO remove unneeded comments
-  //printf("From file:\nnumRows: %d, numCols: %d\n", numRows, numCols);
-
   // ternery ops to make sure numRows/numCols are at least 3
   numRows = (numRows > 2) ? numRows : 3;
   numCols = (numCols > 2) ? numCols : 3;
@@ -27,11 +30,11 @@ game *file_load(char *filename) {
   board->row_max = numRows;
   board->col_max = numCols;
 
-  board->cells = (cell **)calloc(numRows, sizeof(cell *));
+  board->cells = (cell **)calloc(numRows, sizeof(cell **));
 
   int i;
   for (i = 0; i < numRows; i++) {
-    board->cells[i] = (cell *)calloc(numCols, sizeof(cell));
+    board->cells[i] = (cell *)calloc(numCols, sizeof(cell *));
     board->cells[i]->color = gray;
   }
 

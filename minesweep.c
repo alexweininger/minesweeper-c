@@ -1,3 +1,9 @@
+/**
+ * minesweep.c - main logic for minesweep program
+ * author: Alex Weininger
+ * modified: 9/23/2018
+ */
+
 #include "minesweep.h"
 #include "load.h"
 
@@ -25,15 +31,23 @@ int play_game(char *in) {
       // printf("from command line\trow: %d\tcol: %d\tmove: %d\n", row, col,
       // move);
 
-      if (!is_safe(row - 1, col - 1, board->row_max, board->col_max)) {
-        printf("\nInvalid input.\n\n");
+      // check if quit
+      if (row == -1) {
+        if (check_game(board)) {
+          printf("YOU WIN!\nThank you for playing, have a nice day.\n");
+        } else {
+          printf("YOU LOSE! Mines were misidentified, have a nice day.\n");
+        }
+        gameOver = 1; // stop the game loop
       } else {
-        validInput = 1;
-      }
-    }
 
-    if (row == -1) {
-      printf("Game over\n");
+        // check if input is valid board location
+        if (!is_safe(row - 1, col - 1, board->row_max, board->col_max)) {
+          printf("\nInvalid input.\n\n");
+        } else {
+          validInput = 1;
+        }
+      }
     }
 
     int c = process_click(board, row, col, move);
@@ -45,14 +59,17 @@ int play_game(char *in) {
     printf("\nGood one, keep on clicking.\n");
   }
 
+  // free allocated memory
   free_game(board);
 }
 
 int process_click(game *board, int row, int col, int move) {
 
+  // subtract 1 from row and col to convert into 0 indexed values
   row--;
   col--;
 
+  // check if click is within the bounds of the board
   if (!is_safe(row, col, board->row_max, board->col_max)) {
     printf("Invalid input.\n");
     return 0;
@@ -61,29 +78,34 @@ int process_click(game *board, int row, int col, int move) {
   cell *c = &board->cells[row][col];
 
   if (move == 1) {
+    // if move is mark bomb, then set cell color to black
     c->color = black;
   } else if (c->mine < 0) {
+    // if uncover cell with mine, game over!
     printf("\nGAME OVER! You clicked a bomb!\n");
     return 0;
   } else if (c->color == gray) {
-
+    // uncovering gray cell, set to white
     c->color = white;
 
+    // if sorrounding bombs, start to uncover surrounding cells
     if (c->mine == 0) {
 
+      // delta values to check adjacent cells
+      int newRow, newCol;
       int rowDelta[] = {-1, 0, 1, -1, 1, -1, 0, 1};
       int colDelta[] = {-1, -1, -1, 0, 0, 1, 1, 1};
 
-      int newRow, newCol;
-
+      // iterate through each delta x, y pair
       int i = 0;
       for (i = 0; i < 8; i++) {
 
         newRow = row + rowDelta[i];
         newCol = col + colDelta[i];
 
+        // check if surrounding cell indecies are valid before calling uncover()
         if (is_safe(newRow, newCol, board->row_max, board->col_max)) {
-          uncover(board, newRow, newCol);
+          uncover(board, newRow, newCol); // uncover sorrounding cell
         }
       }
     }
