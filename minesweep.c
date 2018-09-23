@@ -16,11 +16,12 @@ int play_game(char *in) {
   int col = -1;
   int move = -1;
 
-  while (!gameOver) {
+  do {
     print_game(board);
 
     int validInput = 0;
-    while (!validInput) {
+    do {
+
       printf("Enter row in range 1-%d: enter column range 1-%d click type (0: "
              "uncover 1: mine)\n",
              board->row_max, board->col_max);
@@ -28,8 +29,6 @@ int play_game(char *in) {
       printf("Example: 2:1 1 -> (row: 2, col: 1, move: mark as a mine)\n");
       printf("Enter '-1' to quit the game.\n\n");
       scanf("%d:%d %d", &row, &col, &move);
-      // printf("from command line\trow: %d\tcol: %d\tmove: %d\n", row, col,
-      // move);
 
       // check if quit
       if (row == -1) {
@@ -39,6 +38,7 @@ int play_game(char *in) {
           printf("YOU LOSE! Mines were misidentified, have a nice day.\n");
         }
         gameOver = 1; // stop the game loop
+        break;
       } else {
 
         // check if input is valid board location
@@ -47,17 +47,18 @@ int play_game(char *in) {
         } else {
           validInput = 1;
         }
+
+        int c = process_click(board, row, col, move);
+
+        if (c == 0) {
+          gameOver = 1;
+        } else {
+          printf("\nGood one, keep on clicking.\n");
+        }
       }
-    }
+    } while (!validInput);
 
-    int c = process_click(board, row, col, move);
-
-    if (c == 0) {
-      gameOver = 1;
-    }
-
-    printf("\nGood one, keep on clicking.\n");
-  }
+  } while (!gameOver);
 
   // free allocated memory
   free_game(board);
