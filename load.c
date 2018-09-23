@@ -17,7 +17,8 @@ game *file_load(char *filename) {
   int numCols = 0;
   fscanf(fp, "%d%d", &numRows, &numCols);
 
-  printf("From file:\nnumRows: %d, numCols: %d\n", numRows, numCols);
+  // TODO remove unneeded comments
+  //printf("From file:\nnumRows: %d, numCols: %d\n", numRows, numCols);
 
   // ternery ops to make sure numRows/numCols are at least 3
   numRows = (numRows > 2) ? numRows : 3;

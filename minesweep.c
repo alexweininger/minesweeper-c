@@ -12,22 +12,37 @@ int play_game(char *in) {
 
   while (!gameOver) {
     print_game(board);
-    printf("Enter row in range 1-%d: enter column range 1-%d click type (0: "
-           "uncover 1: mine)\n",
-           board->row_max, board->col_max);
-    printf("Example= 1:3 0 -- row=1 col=3 try uncover\n");
-    printf("Example= 2:1 1 -- row=2 col=1 mark as a mine\n");
-    printf("Enter '-1' to quit the game\n");
 
-    scanf("%d:%d %d", &row, &col, &move);
-    printf("from command line\trow: %d\tcol: %d\tmove type: %d\n", row, col,
-           move);
+    int validInput = 0;
+    while (!validInput) {
+      printf("Enter row in range 1-%d: enter column range 1-%d click type (0: "
+             "uncover 1: mine)\n",
+             board->row_max, board->col_max);
+      printf("Example: 1:3 0 -> (row: 1, col: 3, move: try to uncover)\n");
+      printf("Example: 2:1 1 -> (row: 2, col: 1, move: mark as a mine)\n");
+      printf("Enter '-1' to quit the game.\n\n");
+      scanf("%d:%d %d", &row, &col, &move);
+      // printf("from command line\trow: %d\tcol: %d\tmove: %d\n", row, col,
+      // move);
+
+      if (!is_safe(row - 1, col - 1, board->row_max, board->col_max)) {
+        printf("\nInvalid input.\n\n");
+      } else {
+        validInput = 1;
+      }
+    }
+
+    if (row == -1) {
+      printf("Game over\n");
+    }
 
     int c = process_click(board, row, col, move);
 
     if (c == 0) {
       gameOver = 1;
     }
+
+    printf("\nGood one, keep on clicking.\n");
   }
 
   free_game(board);
@@ -48,6 +63,7 @@ int process_click(game *board, int row, int col, int move) {
   if (move == 1) {
     c->color = black;
   } else if (c->mine < 0) {
+    printf("\nGAME OVER! You clicked a bomb!\n");
     return 0;
   } else if (c->color == gray) {
 
@@ -71,6 +87,7 @@ int process_click(game *board, int row, int col, int move) {
         }
       }
     }
+    return 1;
   }
 }
 
@@ -81,11 +98,8 @@ int is_safe(int row, int col, int row_max, int col_max) {
     return 1;
   }
 }
-/*
- * TODO done
- */
+
 int uncover(game *board, int row, int col) {
-  print_game(board);
 
   if (!is_safe(row, col, board->row_max, board->col_max)) {
     return 1;
@@ -142,6 +156,7 @@ int check_game(game *board) {
 
 void print_game(game *board) {
 
+  printf("\nBoard (%dx%d):\n", board->row_max, board->col_max);
   int i, j;
   for (i = 0; i < board->row_max; i++) {
     for (j = 0; j < board->col_max; j++) {
@@ -155,7 +170,6 @@ void print_game(game *board) {
         printf("%-d ", board->cells[i][j].mine);
       }
     }
-
     printf("\n");
   }
   printf("\n");
