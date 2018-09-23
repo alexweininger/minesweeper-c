@@ -7,7 +7,6 @@
 #include "minesweep.h"
 #include "cell.h"
 
-
-game* file_load(char*);
+game *file_load(char *);
 
 #endif

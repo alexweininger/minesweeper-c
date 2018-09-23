@@ -1,5 +1,8 @@
 {
 	"terminal.integrated.shell.windows": "",
 	"C_Cpp.default.intelliSenseMode": "gcc-x64",
-	"clang-format.executable": "C:\\Program Files\\LLVM\\bin\\clang-format.exe"
+	"clang-format.executable": "C:\\Program Files\\LLVM\\bin\\clang-format.exe",
+	"files.associations": {
+		"minesweep.h": "c"
+	}
 }

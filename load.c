@@ -13,7 +13,8 @@ game *file_load(char *filename) {
   }
 
   // read numRows/numCols from file
-  int numRows, numCols;
+  int numRows = 0;
+  int numCols = 0;
   fscanf(fp, "%d%d", &numRows, &numCols);
 
   printf("From file:\nnumRows: %d, numCols: %d\n", numRows, numCols);
