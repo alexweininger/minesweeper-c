@@ -21,11 +21,12 @@ game *file_load(char *filename) {
   // read numRows/numCols from file
   int numRows = 0;
   int numCols = 0;
-  fscanf(fp, "%d%d", &numRows, &numCols);
+  fscanf(fp, "%d %d", &numRows, &numCols);
 
-  // ternery ops to make sure numRows/numCols are at least 3
-  numRows = (numRows > 2) ? numRows : 3;
-  numCols = (numCols > 2) ? numCols : 3;
+  if (numRows < 3 || numCols < 3) {
+    printf("invalid board: rows=%d, cols=%d\n", numRows, numCols);
+    return NULL;
+  }
 
   board->row_max = numRows;
   board->col_max = numCols;
@@ -37,13 +38,20 @@ game *file_load(char *filename) {
     board->cells[i] = (cell *)calloc(numCols, sizeof(cell *));
     board->cells[i]->color = gray;
   }
-
+  int mineNumber = 0;
+  int * mineNumber_ptr = &mineNumber;
   for (i = 0; i < numRows; i++) {
     int j;
     for (j = 0; j < numCols; j++) {
-      fscanf(fp, "%d", &board->cells[i][j].mine);
+      fscanf(fp, "%d", mineNumber_ptr);
+      if (mineNumber > -2 && mineNumber < 9) {
+        board->cells[i][j].mine;
+      } else {
+        return NULL;
+      }
     }
     fscanf(fp, "\n");
   }
+  fclose(fp);
   return board;
 }

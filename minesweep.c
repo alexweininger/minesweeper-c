@@ -7,8 +7,14 @@
 #include "minesweep.h"
 #include "load.h"
 
+// handles the user input and output, main function controlling the game
 int play_game(char *in) {
   game *board = file_load(in);
+
+  if (board == NULL) {
+    printf("Error: board file invalid, could not read.");
+    return NULL;
+  }
 
   int gameOver = 0;
 
@@ -64,6 +70,7 @@ int play_game(char *in) {
   free_game(board);
 }
 
+// function that handles the clicks on the board
 int process_click(game *board, int row, int col, int move) {
 
   // subtract 1 from row and col to convert into 0 indexed values
@@ -104,9 +111,9 @@ int process_click(game *board, int row, int col, int move) {
         newRow = row + rowDelta[i];
         newCol = col + colDelta[i];
 
-        // check if surrounding cell indecies are valid before calling uncover()
+        // check if surrounding cell indicies are valid before calling uncover()
         if (is_safe(newRow, newCol, board->row_max, board->col_max)) {
-          uncover(board, newRow, newCol); // uncover sorrounding cell
+          uncover(board, newRow, newCol); // uncover surrounding cell
         }
       }
     }
@@ -114,6 +121,7 @@ int process_click(game *board, int row, int col, int move) {
   }
 }
 
+// check wether or not an index is in array bounds
 int is_safe(int row, int col, int row_max, int col_max) {
   if (row < 0 || row >= row_max || col < 0 || col >= col_max) {
     return 0;
@@ -122,18 +130,22 @@ int is_safe(int row, int col, int row_max, int col_max) {
   }
 }
 
+// uncover the gray cells, and any surrounding gray cells recursively.
 int uncover(game *board, int row, int col) {
 
   if (!is_safe(row, col, board->row_max, board->col_max)) {
     return 1;
   } else if (board->cells[row][col].mine > 0) {
+    // if cell has a bomb count return 1 and turn the cell white
     board->cells[row][col].color = white;
     return 1;
   }
 
   if (board->cells[row][col].color == white) {
+    // cell is already white
     return 1;
   } else if (board->cells[row][col].color == black) {
+    // found bomb
     return 0;
   } else {
     // color is gray
@@ -154,10 +166,12 @@ int uncover(game *board, int row, int col) {
         uncover(board, newRow, newCol);
       }
     }
+    printf("%d\n", unc);
     return unc;
   }
 }
 
+// check if user has won or lost
 int check_game(game *board) {
   int i, j;
   for (i = 0; i < board->row_max; i++) {
@@ -177,6 +191,7 @@ int check_game(game *board) {
   return 1;
 }
 
+// print the board to the console
 void print_game(game *board) {
 
   printf("\nBoard (%dx%d):\n", board->row_max, board->col_max);
@@ -198,10 +213,11 @@ void print_game(game *board) {
   printf("\n");
 }
 
+// free memory allocated on the heap
 void free_game(game *board) {
   int i = 0;
   for (i = 0; i < board->row_max; i++) {
     free(board->cells[i]);
   }
-  free(board);
+  free(board->cells);
 }
