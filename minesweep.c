@@ -9,21 +9,19 @@
 
 // handles the user input and output, main function controlling the game
 int play_game(char *in) {
-  game *board = file_load(in);
+  game *board = file_load(in); // load board from file
 
-  if (board == NULL) {
-    printf("Error: board file invalid, could not read.");
-    return NULL;
+  if (board == NULL) { // make sure board is not NULL
+    return 0;
   }
 
   int gameOver = 0;
-
   int row = -1;
   int col = -1;
   int move = -1;
 
   do {
-    print_game(board);
+    print_game(board); // print board before each turn
 
     int validInput = 0;
     do {
@@ -40,18 +38,19 @@ int play_game(char *in) {
       if (row == -1) {
         if (check_game(board)) {
           printf("YOU WIN!\nThank you for playing, have a nice day.\n");
+          return 1;
         } else {
           printf("YOU LOSE! Mines were misidentified, have a nice day.\n");
+          return 1;
         }
         gameOver = 1; // stop the game loop
         break;
       } else {
-
         // check if input is valid board location
         if (!is_safe(row - 1, col - 1, board->row_max, board->col_max)) {
           printf("\nInvalid input.\n\n");
         } else {
-          validInput = 1;
+          validInput = 1; // input is valid
         }
 
         int c = process_click(board, row, col, move);
@@ -62,12 +61,11 @@ int play_game(char *in) {
           printf("\nGood one, keep on clicking.\n");
         }
       }
-    } while (!validInput);
+    } while (!validInput); // repeat if input is invalid
 
-  } while (!gameOver);
+  } while (!gameOver); // stop playing when game is over
 
-  // free allocated memory
-  free_game(board);
+  free_game(board); // free allocated memory
 }
 
 // function that handles the clicks on the board
@@ -96,9 +94,8 @@ int process_click(game *board, int row, int col, int move) {
     // uncovering gray cell, set to white
     c->color = white;
 
-    // if sorrounding bombs, start to uncover surrounding cells
+    // if surrounding bombs, start to uncover surrounding cells
     if (c->mine == 0) {
-
       // delta values to check adjacent cells
       int newRow, newCol;
       int rowDelta[] = {-1, 0, 1, -1, 1, -1, 0, 1};
@@ -125,49 +122,40 @@ int process_click(game *board, int row, int col, int move) {
 int is_safe(int row, int col, int row_max, int col_max) {
   if (row < 0 || row >= row_max || col < 0 || col >= col_max) {
     return 0;
-  } else {
-    return 1;
   }
+  return 1;
 }
 
 // uncover the gray cells, and any surrounding gray cells recursively.
 int uncover(game *board, int row, int col) {
-
   if (!is_safe(row, col, board->row_max, board->col_max)) {
-    return 1;
-  } else if (board->cells[row][col].mine > 0) {
+    return 0;
+  }
+
+  if (board->cells[row][col].mine > 0) {
     // if cell has a bomb count return 1 and turn the cell white
     board->cells[row][col].color = white;
     return 1;
   }
 
-  if (board->cells[row][col].color == white) {
-    // cell is already white
+ if (board->cells[row][col].color == white) {
+    // cell is already white, return 1
     return 1;
-  } else if (board->cells[row][col].color == black) {
-    // found bomb
+  } else if (board->cells[row][col].color == black) { // found bomb, return 0
     return 0;
-  } else {
-    // color is gray
+  } else { // color is gray
     board->cells[row][col].color = white;
 
     int rowDelta[] = {-1, 0, 1, -1, 1, -1, 0, 1};
     int colDelta[] = {-1, -1, -1, 0, 0, 1, 1, 1};
 
-    int newRow, newCol;
-
-    int i, unc;
+    int i, newRow, newCol;
     for (i = 0; i < 8; i++) {
 
       newRow = row + rowDelta[i];
       newCol = col + colDelta[i];
-
-      if (is_safe(newRow, newCol, board->row_max, board->col_max)) {
-        uncover(board, newRow, newCol);
-      }
+      uncover(board, newRow, newCol);
     }
-    printf("%d\n", unc);
-    return unc;
   }
 }
 
@@ -175,7 +163,6 @@ int uncover(game *board, int row, int col) {
 int check_game(game *board) {
   int i, j;
   for (i = 0; i < board->row_max; i++) {
-
     for (j = 0; j < board->col_max; j++) {
 
       if (board->cells[i][j].mine < 0) {
@@ -198,14 +185,15 @@ void print_game(game *board) {
   int i, j;
   for (i = 0; i < board->row_max; i++) {
     for (j = 0; j < board->col_max; j++) {
-      if (board->cells[i][j].color == white && board->cells[i][j].mine == 0) {
+      cell *c = &board->cells[i][j];
+      if (c->color == white && c->mine == 0) {
         printf("0 ");
-      } else if (board->cells[i][j].color == black) {
+      } else if (c->color == black) {
         printf("B ");
-      } else if (board->cells[i][j].color == gray) {
+      } else if (c->color == gray) {
         printf("E ");
-      } else if (board->cells[i][j].color == white) {
-        printf("%-d ", board->cells[i][j].mine);
+      } else if (c->color == white) {
+        printf("%-d ", c->mine);
       }
     }
     printf("\n");
@@ -217,7 +205,9 @@ void print_game(game *board) {
 void free_game(game *board) {
   int i = 0;
   for (i = 0; i < board->row_max; i++) {
+    // free each row
     free(board->cells[i]);
   }
-  free(board->cells);
+  free(board->cells); // free cells
+  free(board); // free board
 }

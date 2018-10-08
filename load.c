@@ -9,24 +9,25 @@
 #include "minesweep.h"
 
 game *file_load(char *filename) {
-  game *board = (game *)malloc(sizeof(game));
 
   FILE *fp = fopen(filename, "r");
 
   if (fp == NULL) {
-    printf("Error: could not open file: %s for reading.\n", filename);
+    printf("Error: Could not open file \"%s\" for reading.\n", filename);
     return NULL;
   }
 
-  // read numRows/numCols from file
+  // read numRows and numCols from file
   int numRows = 0;
   int numCols = 0;
   fscanf(fp, "%d %d", &numRows, &numCols);
 
   if (numRows < 3 || numCols < 3) {
-    printf("invalid board: rows=%d, cols=%d\n", numRows, numCols);
+    printf("Error: Invalid dimensions rows: %d\tcols: %d\n", numRows, numCols);
     return NULL;
   }
+
+  game *board = (game *)malloc(sizeof(game));
 
   board->row_max = numRows;
   board->col_max = numCols;
@@ -39,19 +40,20 @@ game *file_load(char *filename) {
     board->cells[i]->color = gray;
   }
   int mineNumber = 0;
-  int * mineNumber_ptr = &mineNumber;
-  for (i = 0; i < numRows; i++) {
+  // int * mineNumber_ptr = &mineNumber;
+  for (i = 0; i < numRows; i++) { // go through each row
     int j;
-    for (j = 0; j < numCols; j++) {
-      fscanf(fp, "%d", mineNumber_ptr);
-      if (mineNumber > -2 && mineNumber < 9) {
-        board->cells[i][j].mine;
+    for (j = 0; j < numCols; j++) { // each col
+      fscanf(fp, "%d", &mineNumber);
+      if (mineNumber > -2 && mineNumber < 9) { // check mine number for error
+        board->cells[i][j].mine = mineNumber;
       } else {
+        printf("Error: Invalid board value %d, %d: %d.\n", j + 1, i + 1, mineNumber);
         return NULL;
       }
     }
-    fscanf(fp, "\n");
+    fscanf(fp, "\n"); // get the newline
   }
-  fclose(fp);
+  fclose(fp); // close file
   return board;
 }
